@@ -177,7 +177,20 @@
                    END AS 기본주소 -- CASE 마침.
         FROM MEMBER -- 멤버테이블 지정.
        WHERE MEM_ADD1 LIKE '대전%'; -- ADD1 컬럼내에서 대전으로시작하는 모든 데이터값 지정
-    
-    
+
+ 8) INSTR(c1,c2[,m[,n]])
+  - 주어진 c1 문자열에서 c2 문자열이 처음 나타나는 위치를 반환
+  - m은 시작위치를 나타내며
+  - n은 반복 나타낸 횟수
+ (사용예)
+  SELECT INSTR('APPLEBANANAPERSIMMON','L') AS COL1,
+         INSTR('APPLEBANANAPERSIMMON','A',3) AS COL1,
+         INSTR('APPLEBANANAPERSIMMON','A',3,2) AS COL1
+         INSTR('APPLEBANANAPERSIMMON','A',-3) AS COL1,
+    FROM DUAL;
+
+ 9) LENGTHB(c1), LENGTH(c1)
+  - 주어진 문자열의 길이를 BYTE수로(LENGTHB), 글자수로(LENGTH)로 반환
+  
     
     
