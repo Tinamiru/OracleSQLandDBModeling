@@ -87,3 +87,138 @@
     WHERE CART_NO LIKE '202005%'
     GROUP BY CART_MEMBER
     ORDER BY 1;
+
+    
+사용예) 매입테이블(BUYPROD)에서 2020년 상반기(1월~6월) 월별, 제품별 매입집계를 조회하시오.
+    SELECT EXTRACT(MONTH FROM BUY_DATE) AS 월별,
+           BUY_PROD AS 제품코드,
+           SUM(BUY_QTY) AS 매입수량합계,
+           SUM(BUY_QTY*BUY_COST) AS 매입금액합계
+      FROM BUYPROD
+     WHERE BUY_DATE BETWEEN TO_DATE('20200101') AND TO_DATE('20200630')
+     GROUP BY EXTRACT(MONTH FROM BUY_DATE), BUY_PROD
+     ORDER BY 1,2;
+     
+     
+사용예) 매입테이블(BUYPROD)에서 2020년 상반기(1월~6월) 월별 매입집계를 조회하되
+       매입금액이 1억원 이상인 월만 조회하시오.
+    SELECT EXTRACT(MONTH FROM BUY_DATE) AS 월별,
+           SUM(BUY_QTY) AS 매입수량합계,
+           SUM(BUY_QTY*BUY_COST) AS 매입금액합계           
+      FROM BUYPROD
+     WHERE BUY_DATE BETWEEN TO_DATE('20200101') AND TO_DATE('20200630')
+     GROUP BY EXTRACT(MONTH FROM BUY_DATE)
+    HAVING SUM(BUY_QTY*BUY_COST)>=100000000
+     ORDER BY 1;
+
+       
+사용예) 회원테이블에서 성별 평균 마일리지를 조회하시오.
+
+  SELECT CASE WHEN SUBSTR(MEM_REGNO2,1,1)='1' OR
+                   SUBSTR(MEM_REGNO2,1,1)='3' THEN
+                   '남성'
+              ELSE 
+                   '여성'
+         END AS 성별,
+         ROUND(AVG(MEM_MILEAGE)) AS 평균마일리지
+    FROM MEMBER
+   GROUP BY CASE WHEN SUBSTR(MEM_REGNO2,1,1)='1' OR
+                      SUBSTR(MEM_REGNO2,1,1)='3' THEN
+                      '남성'
+                 ELSE 
+                      '여성'
+             END;
+
+사용예) 회원테이블에서 연령별 평균마일리지를 조회하시오
+  SELECT TRUNC(EXTRACT(YEAR FROM SYSDATE)-EXTRACT(YEAR FROM MEM_BIR),-1)||'대'
+            AS 연령대,
+         ROUND(AVG(MEM_MILEAGE)) AS 평균마일리지
+    FROM MEMBER
+   GROUP BY TRUNC(EXTRACT(YEAR FROM SYSDATE)-EXTRACT(YEAR FROM MEM_BIR),-1)||'대'
+   ORDER BY 1;
+
+사용예) 회원테이블에서 거주지별 평균마일리지를 조회하시오.
+  SELECT SUBSTR(MEM_ADD1,1,2) AS 거주지,
+         ROUND(AVG(MEM_MILEAGE)) AS 평균마일리지
+    FROM MEMBER
+   GROUP BY SUBSTR(MEM_ADD1,1,2);
+
+사용예) 매입테이블(BUYPROD)에서 2020년 상반기(1월~6월) 제품별 매입집계를 조회하되
+       금액 기준 상위 5개 제품만 조회하시오.
+   SELECT A.BID AS 제품코드,
+          A.QSUM AS 수량합계,
+          A.CSUM AS 금액합계
+     FROM (SELECT BUY_PROD AS BID, -- 참조 할때 한글은 정확하게 참조되어진다는 보장이 안된다. 가급적 영문명으로.
+                  SUM(BUY_QTY) AS QSUM,
+                  SUM(BUY_QTY*BUY_COST) AS CSUM
+             FROM BUYPROD
+            WHERE BUY_DATE BETWEEN TO_DATE('20200101') AND TO_DATE('20200630')
+            GROUP BY BUY_PROD
+            ORDER BY 3 DESC)A
+    WHERE ROWNUM<=5;
+ 
+ 
+ 5. ROLLUP과 CUBE
+   1) ROLLUP
+     - GROUP BY 절 안에 사용하여 레벨별 집계의 결과를 반환
+    (사용형식)
+      GROUP BY ROLLUP[컬럼명1[,컬럼명2,...,컬럼명n])
+        . 컬럼명1,컬럼명2,...,컬럼명n 을(가장 하위레벨) 기준으로 그룹구성하여 그룹함수 수행한 후 
+          오른쪽에 기술된 컬럼명을 하나씩 제거한 기준으로 그룹 구성, 마지막으로 전체 합계 반환
+        . n개의 컬럼이  사용된 경우 n+1종류의 집계반환ㄴ
+        
+사용예) 장바구니테이블에서 2020년 월별,회원별,제품별 판매수량 집계 조회.        
+ -- GROUP BY 만 사용한 경우.
+      SELECT SUBSTR(CART_NO,5,2) AS 월,
+             CART_MEMBER AS 회원번호,
+             CART_PROD AS 제품코드,
+             SUM(CART_QTY) AS 판매수량집계
+        FROM CART
+       WHERE SUBSTR(CART_NO,1,4)='2020'
+       GROUP BY SUBSTR(CART_NO,5,2), CART_MEMBER,CART_PROD
+       ORDER BY 1;
+       
+ -- ROLLUP의 예       
+      SELECT SUBSTR(CART_NO,5,2) AS 월,
+             CART_MEMBER AS 회원번호,
+             CART_PROD AS 제품코드,
+             SUM(CART_QTY) AS 판매수량집계
+        FROM CART
+       WHERE SUBSTR(CART_NO,1,4)='2020'
+       GROUP BY ROLLUP(SUBSTR(CART_NO,5,2), CART_MEMBER,CART_PROD)
+       ORDER BY 1;
+       
+  ** 부분 ROLLUP
+    . 그룹을 분류 기준 컬럼이 ROLLUP절 밖(GROUP BY 절 안)에 기술된 경우를 부분 ROLLUP 이라고 함
+    . ex) GROUP BY 컬럼명1, ROLLUP(컬럼명2,컬럼명3) 인 경우
+      => 컬럼명1, 컬럼명2, 컬럼명3 모두가 적용된 직계
+         컬럼명1, 컬럼명2가 반영된 집계
+         컬럼명1만 반영된 집계
+  -- ROLLUP의 예       
+      SELECT SUBSTR(CART_NO,5,2) AS 월,
+             CART_MEMBER AS 회원번호,
+             CART_PROD AS 제품코드,
+             SUM(CART_QTY) AS 판매수량집계
+        FROM CART
+       WHERE SUBSTR(CART_NO,1,4)='2020'
+       GROUP BY CART_PROD, ROLLUP(SUBSTR(CART_NO,5,2), CART_MEMBER)
+       ORDER BY 1;
+
+
+   2) CUBE
+     - GROUP BY 절 안에서 사용(ROLLUP과 동일)
+     - 레벨개념이 없음
+     - CUBE 내에 기술된 컬럼들의 조합 가능한 경우마다 집계반환(2의 n승수 만큼의 집계반환)
+   (사용형식)
+     GROUP BY CUBE(컬럼명1,...컬럼명n);
+     
+      SELECT SUBSTR(CART_NO,5,2) AS 월,
+             CART_MEMBER AS 회원번호,
+             CART_PROD AS 제품코드,
+             SUM(CART_QTY) AS 판매수량집계
+        FROM CART
+       WHERE SUBSTR(CART_NO,1,4)='2020'
+       GROUP BY CUBE(SUBSTR(CART_NO,5,2),CART_MEMBER,CART_PROD)
+       ORDER BY 1;
+     
+     
