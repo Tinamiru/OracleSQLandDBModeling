@@ -135,27 +135,6 @@
    WHERE A.PROD_PRICE>=500000
    ORDER BY 5 DESC;
    
-사용예)2020년 상반기 거래처별 판매액집계를 구하시오
-       Alias는 거래처코드,거래처명,판매액합계
-    
-  SELECT A.BUYER_ID AS 거래처코드,
-         A.BUYER_NAME AS 거래처명,
-         SUM(C.CART_QTY*B.PROD_PRICE)판매액합계
-    FROM BUYER A, PROD B, CART C
-   WHERE A.BUYER_ID=B.PROD_BUYER AND B.PROD_ID=C.CART_PROD
-     AND SUBSTR(C.CART_NO,1,8) BETWEEN TO_DATE('20200101') AND TO_DATE('20200630')
-   GROUP BY A.BUYER_ID, A.BUYER_NAME
-   ORDER BY 1;
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
+
    
   
