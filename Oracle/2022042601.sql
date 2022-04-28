@@ -139,6 +139,33 @@ UNION ALL
       AND C.PARENT_ID=B.DEPARTMENT_ID
     ORDER BY 5;
     
+**계층형 쿼리
+  - 계층적 구조를 지닌 테이블의 내용을 출력할때 사용
+  - 트리구조를 이용한 방식
+  (사용형식)
+     SELECT 컬럼list
+       FROM 테이블명
+      START WITH 조건 -- 루트(root)노드 지정
+    CONNECT BY NOCYCLE|PRIOR 계층구조 조건 -- 계층구조가 어떤식으로 연결되었는지 설정
+    
+
+** CONNECT BY PRIOR 자식컬럼 = 부모컬럼 : 부모에서 자식으로 트리구성(Top DOWN)
+   CONNECT BY PRIOR 부모컬럼 = 자식컬럼 : 자식에서 부모로 트리구성(DOWN Top)
+
+** PRIOR 사용위치에 따른 방향
+     CONNECT
+  
+
+**계층형 쿼리 확장
+    CONNECT_BY_ROOT 컬럼명 : 루트노드 찾기
+    CONNECT_BY_ISCYCLE : 중복참조값 찾기
+    CONNECT_BY_ISLEAF : 단말노드 찾기
+    
+    
+    
+    
+    
+    
     
     
     
