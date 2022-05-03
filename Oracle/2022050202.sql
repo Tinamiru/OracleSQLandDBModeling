@@ -87,7 +87,7 @@
     . 기본키
     . SORT(ORDER BY)나 JOIN연산에 자주 사용되는 컬럼
     
-    --? 현업, 인덱스처럼 시간,소요시간, 시간복잡도가 중요한지
+    -- ? 현업, 인덱스처럼 시간,소요시간, 시간복잡도가 중요한지
   
   - 인덱스의 종류
     . Unique / Non-unique
@@ -112,3 +112,22 @@
      
   DROP INDEX IDX_MEM_NAME;
     
+    
+사용예)
+  CREATE INDEX IDX_PROD
+    ON PROD(SUBSTR(PROD_ID,1,5)||SUBSTR(PROD_ID,9));
+    
+    SELECT * FROM PROD
+     WHERE SUBSTR(PROD_ID,1,5)||SUBSTR(PROD_ID,9)='P202013';
+ 
+** 인덱스의 재구성
+  - 인덱스를 다른테이블스페이스로 이동시키는 경우
+  - 데이터테이블이 이동된 경우
+  - 삽입삭제가 다수 발생된 직후
+  ALTER 인덱스명 REBUILD:
+  
+    
+    
+    
+    
+        
